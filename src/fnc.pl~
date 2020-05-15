@@ -15,11 +15,17 @@ negar(A, ~A):-
 negar((~A), A):-
     var(A).
 
-negar(A\/B, (~A)/\(~B)).
+negar(A\/B, X/\Y):-
+    negar(A, X),
+    negar(B, Y), !.
 
-negar(A/\B, (~A)\/(~B)).
+negar(A/\B, X\/Y):-
+    negar(A, X),
+    negar(B, Y), !.
 
 convertir(X, X):- var(X).
+
+convertir((~X), (~X)):-var(X).
 
 convertir((X\/Y), (X\/Y)):-
    var(X), var(Y).
@@ -44,9 +50,11 @@ convertir(~(A/\B), (C\/D)):-
     negar(Y, D), !.
 
 convertir((X <=> Y), R) :- convertir((X => Y), R), convertir((Y => X), R).
-convertir((X => Y), R) :-
-    negar(X, T)
-    convertir((T \/ Y), R).
+
+convertir(X => Y, A\/B) :-
+
+    convertir(X, A),
+    convertir(Y, B).
 
 convertir(top, bottom).
 convertir(bottom, top).
