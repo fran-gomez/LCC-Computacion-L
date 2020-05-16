@@ -8,6 +8,7 @@
 :- op(600,xfx,=>).   % implicacion, infija, no asociativa.
 :- op(650,xfx,<=>).  % equivalencia, infija, no asociativa.
 
-teorema(T) :- fncr(T, FNCR), refutable(FNCR).
-
-refutable(a /\ ~a).
+teorema(T) :-
+    write('Iniciando prueba de teorema por refutacion...\n'),
+    fncr(T, FNCR),
+    refutable(FNCR).
