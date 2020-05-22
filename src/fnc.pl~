@@ -60,7 +60,7 @@ convertir((X\/Y), T):-
     convertir(X, R),
     distribuir(R\/Y, T).
 
-convertir((X\/Y), R):-
+convertir((X\/Y), M\/N):-
     convertir(X, Z),
     convertir(Y, T),
     distribuir(Z, M),
