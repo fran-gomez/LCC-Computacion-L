@@ -4,10 +4,8 @@
 :- op(600,xfx,=>).   % implicacion, infija, no asociativa.
 :- op(650,xfx,<=>).  % equivalencia, infija, no asociativa.
 
-%fncr((X /\ Y), (A /\ B)) :- fncr(X, A), fncr(Y, B), !.
-%fncr((X \/ Y), R).
-
-fncr(T, R) :- convertir(T, R), !.
+fncr(T, X) :-
+    convertir(T, X), !.
 
 negar(A, ~A):-
     var(A).
@@ -27,27 +25,46 @@ convertir(X, X):- var(X).
 
 convertir((~X), (~X)):-var(X).
 
-convertir((X\/Y), (X\/Y)):-
-   var(X), var(Y).
-
-convertir((X\/Y), (X\/R)):-
-    var(X),
-    convertir(Y, R).
-
-convertir((X\/Y), (R\/Y)):-
-    var(Y),
-    convertir(X, R).
-
 convertir((X/\Y), (X/\Y)):-
    var(X), var(Y).
 
-convertir((X/\Y), (X/\R)):-
+convertir((X/\Y), T):-
     var(X),
-    convertir(Y, R).
+    not(var(Y)),
+    convertir(Y, R),
+    distribuir(X/\R, T), !.
 
-convertir((X/\Y), (R/\Y)):-
+convertir((X/\Y), T):-
     var(Y),
-    convertir(X, R).
+    convertir(X, R),
+    distribuir(R/\Y, T), !.
+
+convertir((X/\Y), M/\N):-
+    convertir(X, Z),
+    convertir(Y, T),
+    distribuir(Z, M),
+    distribuir(T, N),
+    !.
+
+convertir((X\/Y), (X\/Y)):-
+   var(X), var(Y).
+
+convertir((X\/Y), T):-
+    var(X),
+    not(var(Y)),
+    convertir(Y, R),
+    distribuir(X\/R, T).
+
+convertir((X\/Y), T):-
+    var(Y),
+    convertir(X, R),
+    distribuir(R\/Y, T).
+
+convertir((X\/Y), R):-
+    convertir(X, Z),
+    convertir(Y, T),
+    distribuir(Z, M),
+    distribuir(T, N), !.
 
 convertir(~X, T):-
     convertir(X, Y),
@@ -71,18 +88,40 @@ convertir((X <=> Y), A/\B) :-
 
 convertir(X => Y, A\/B) :-
     convertir(X, Xc),
-    write(Xc),
     convertir(Y, B),
-    write(B),
-    negar(Xc, A).
+    negar(Xc, A), !.
 
 convertir(top, bottom).
 convertir(bottom, top).
 
-%convertir(~(~X), R) :- convertir(X, R).
-%convertir(~(X /\ Y), R) :- convertir((~X \/ ~Y), R).
-%convertir(~(X \/ Y), R) :- convertir((~X /\ ~Y), R).
+distribuir(A\/B, A\/B):- var(A), var(B), !.
 
-distribuir(X /\ (Y \/ Z), (X /\ Y) \/ (X /\ Z)).
-distribuir(X \/ (Y /\ Z), (X \/ Y) /\ (X \/ Z)).
-distribuir(X, X):- var(X).
+distribuir((~A)\/B, (~A)\/B):- var(A), var(B), !.
+
+distribuir(A\/(~B), A\/(~B)):- var(A), var(B), !.
+
+distribuir((~A)\/(~B), (~A)\/(~B)):- var(A), var(B), !.
+
+distribuir(A/\B, A/\B):- var(A), var(B), !.
+
+distribuir((~A)/\B, (~A)/\B):- var(A), var(B), !.
+
+distribuir(A/\(~B), A/\(~B)):- var(A), var(B), !.
+
+distribuir(A/\(B/\C), A/\B/\C).
+
+distribuir(A\/(B\/C), A\/B\/C).
+
+distribuir((A\/B)/\C, (A\/B)/\(A\/C)/\(C\/B)):- var(C),!.
+
+distribuir(A/\(B\/C), (A\/C)/\(B\/A)/\(B\/C)):- var(A), !.
+
+distribuir((A/\B)\/C, (A\/C)/\(B\/C)):- var(C), !.
+
+distribuir(A\/(B/\C), (A\/B)/\(A\/C)):- var(A), !.
+
+distribuir((A/\B)\/C, R/\S):-
+    distribuir(A\/C, R),
+    distribuir(B\/C, S).
+
+
