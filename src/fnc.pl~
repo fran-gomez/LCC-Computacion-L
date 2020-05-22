@@ -94,6 +94,8 @@ convertir(X => Y, A\/B) :-
 convertir(top, bottom).
 convertir(bottom, top).
 
+distribuir(A, A):- var(A).
+
 distribuir(A\/B, A\/B):- var(A), var(B), !.
 
 distribuir((~A)\/B, (~A)\/B):- var(A), var(B), !.

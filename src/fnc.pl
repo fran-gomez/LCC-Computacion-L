@@ -126,4 +126,9 @@ distribuir((A/\B)\/C, R/\S):-
     distribuir(A\/C, R),
     distribuir(B\/C, S).
 
+distribuir(C\/(A/\B), R/\S):-
+    distribuir(C\/A, R),
+    distribuir(C\/B, S).
+
+
 
