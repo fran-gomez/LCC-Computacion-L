@@ -7,68 +7,41 @@
 fncr(T, X) :-
     convertir(T, X), !.
 
-negar(A, ~A):-
-    var(A).
+negar(A\/B, T):-
+    negar(A, X),
+    negar(B, Y),
+    distribuir(X/\Y, T), !.
+
+negar(A/\B, T):-
+    negar(A, X),
+    negar(B, Y),
+    distribuir(X\/Y, T), !.
 
 negar((~A), A):-
-    var(A).
+    ground(a).
 
-negar(A\/B, X/\Y):-
-    negar(A, X),
-    negar(B, Y), !.
+negar(A, ~A):-
+    ground(A), !.
 
-negar(A/\B, X\/Y):-
-    negar(A, X),
-    negar(B, Y), !.
+convertir((X <=> Y), A/\B) :-
+    convertir((X => Y), A),
+    convertir((Y => X), B).
 
-convertir(X, X):- var(X).
+convertir(X => Y, T) :-
+    convertir(X, Xc),
+    convertir(Y, B),
+    negar(Xc, A),
+    distribuir(A\/B, T), !.
 
-convertir((~X), (~X)):-var(X).
+convertir(X/\Y, T):-
+    convertir(X, A),
+    convertir(Y, B),
+    distribuir(A/\B, T).
 
-convertir((X/\Y), (X/\Y)):-
-   var(X), var(Y).
-
-convertir((X/\Y), T):-
-    var(X),
-    not(var(Y)),
-    convertir(Y, R),
-    distribuir(X/\R, T), !.
-
-convertir((X/\Y), T):-
-    var(Y),
-    convertir(X, R),
-    distribuir(R/\Y, T), !.
-
-convertir((X/\Y), M/\N):-
-    convertir(X, Z),
-    convertir(Y, T),
-    distribuir(Z, M),
-    distribuir(T, N),
-    !.
-
-convertir((X\/Y), (X\/Y)):-
-   var(X), var(Y).
-
-convertir((X\/Y), T):-
-    var(X),
-    not(var(Y)),
-    convertir(Y, R),
-    distribuir(X\/R, T).
-
-convertir((X\/Y), T):-
-    var(Y),
-    convertir(X, R),
-    distribuir(R\/Y, T).
-
-convertir((X\/Y), M\/N):-
-    convertir(X, Z),
-    convertir(Y, T),
-    distribuir(Z, M),
-    distribuir(T, N), !.
-
-convertir(~X, T):-
-    convertir(X, Y),
-    negar(Y, T).
+convertir(X\/Y, T):-
+    convertir(X, A),
+    convertir(Y, B),
+    distribuir(A\/B, T).
 
 convertir(~(A\/B), (C/\D)):-
    convertir(A, X),
@@ -82,53 +55,26 @@ convertir(~(A/\B), (C\/D)):-
     negar(X, C),
     negar(Y, D), !.
 
-convertir((X <=> Y), A/\B) :-
-    convertir((X => Y), A),
-    convertir((Y => X), B).
+convertir(X, X):- ground(X).
 
-convertir(X => Y, A\/B) :-
-    convertir(X, Xc),
-    convertir(Y, B),
-    negar(Xc, A), !.
+convertir((~X), (~X)):- ground(X).
 
 convertir(top, bottom).
 convertir(bottom, top).
 
-distribuir(A, A):- var(A).
+distribuir(A\/(B/\C), (A\/B)/\(A\/C)):-
+     A \= _/\_, !.
 
-distribuir(A\/B, A\/B):- var(A), var(B), !.
+distribuir((A/\B)\/C, (A\/C)/\(B\/C)).
 
-distribuir((~A)\/B, (~A)\/B):- var(A), var(B), !.
+distribuir((A\/B)/\C, (A\/B)/\(A\/C)/\(C\/B)):-
+    C \= _\/_, !.
 
-distribuir(A\/(~B), A\/(~B)):- var(A), var(B), !.
+distribuir(A/\(B\/C), (B\/A)/\(A\/C)/\(B\/C)).
 
-distribuir((~A)\/(~B), (~A)\/(~B)):- var(A), var(B), !.
+distribuir((~A), B):-
+    negar(A, B).
 
-distribuir(A/\B, A/\B):- var(A), var(B), !.
-
-distribuir((~A)/\B, (~A)/\B):- var(A), var(B), !.
-
-distribuir(A/\(~B), A/\(~B)):- var(A), var(B), !.
-
-distribuir(A/\(B/\C), A/\B/\C).
-
-distribuir(A\/(B\/C), A\/B\/C).
-
-distribuir((A\/B)/\C, (A\/B)/\(A\/C)/\(C\/B)):- var(C),!.
-
-distribuir(A/\(B\/C), (A\/C)/\(B\/A)/\(B\/C)):- var(A), !.
-
-distribuir((A/\B)\/C, (A\/C)/\(B\/C)):- var(C), !.
-
-distribuir(A\/(B/\C), (A\/B)/\(A\/C)):- var(A), !.
-
-distribuir((A/\B)\/C, R/\S):-
-    distribuir(A\/C, R),
-    distribuir(B\/C, S).
-
-distribuir(C\/(A/\B), R/\S):-
-    distribuir(C\/A, R),
-    distribuir(C\/B, S).
-
-
+distribuir(A, A):-
+    ground(A).
 
