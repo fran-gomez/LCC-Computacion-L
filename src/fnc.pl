@@ -43,37 +43,60 @@ convertir(X\/Y, T):-
     convertir(Y, B),
     distribuir(A\/B, T).
 
-convertir(~(A\/B), (C/\D)):-
+convertir(~(A\/B), T):-
    convertir(A, X),
    convertir(B, Y),
    negar(X, C),
-   negar(Y, D), !.
+   negar(Y, D),
+   distribuir(C/\D, T), !.
 
-convertir(~(A/\B), (C\/D)):-
+convertir(~(A/\B), T):-
     convertir(A, X),
     convertir(B, Y),
     negar(X, C),
-    negar(Y, D), !.
+    negar(Y, D),
+    distribuir(C\/D, T), !.
 
-convertir(X, X):- ground(X).
+convertir(A\/A, A).
 
-convertir((~X), (~X)):- ground(X).
+convertir(A/\A, A).
+
+convertir(X, T):- distribuir(X, T).
 
 convertir(top, bottom).
 convertir(bottom, top).
 
-distribuir(A\/(B/\C), (A\/B)/\(A\/C)):-
-     A \= _/\_, !.
+distribuir(A\/(B/\C), X/\Y):-
+     A \= _/\_,
+     distribuir(A\/B, X),
+     distribuir(A\/C, Y),!.
 
-distribuir((A/\B)\/C, (A\/C)/\(B\/C)).
+distribuir((A/\B)\/C, X/\Y):-
+     distribuir((A\/C), X),
+     distribuir((B\/C), Y), !.
 
-distribuir((A\/B)/\C, (A\/B)/\(A\/C)/\(C\/B)):-
-    C \= _\/_, !.
+distribuir((A\/B)/\C, X/\Y/\Z):-
+     C \= _\/_,
+     distribuir(A\/B, X),
+     distribuir(A\/C, Y),
+     distribuir(C\/B, Z), !.
 
-distribuir(A/\(B\/C), (B\/A)/\(A\/C)/\(B\/C)).
+distribuir(A\/A, A).
 
-distribuir((~A), B):-
-    negar(A, B).
+distribuir(A/\A, A).
+
+distribuir(A/\(B\/C), X/\Y/\Z):-
+     distribuir(B\/A, X),
+     distribuir(A\/C, Y),
+     distribuir(B\/C, Z),!.
+
+distribuir(A\/(B\/C), X\/Y\/Z):-
+    distribuir(A, X),
+    distribuir(B, Y),
+    distribuir(C, Z).
+
+distribuir(~(~A), A).
+
 
 distribuir(A, A):-
     ground(A).
