@@ -4,9 +4,10 @@
 :- op(600,xfx,=>).   % implicacion, infija, no asociativa.
 :- op(650,xfx,<=>).  % equivalencia, infija, no asociativa.
 
-fncr(T, F) :-
+fncr(T, X) :-
     convertir(T, R),
-    reducir(R, F), !.
+    reducir(R, F),
+   eliminarRep(F, X), !.
 
 negar(A\/B, T):-
     negar(A, X),
@@ -183,7 +184,30 @@ transformar2(A, B):-
 transformar2(A, _):-
     transformar(A).
 
+separar([A], A).
+
 separar([A,B], A\/B).
 
 separar([A | Tail], A\/T):-
     separar(Tail, T).
+
+eliminarRep(L, T):-
+    listar2(L, S),
+    sort(S, R),
+    separar2(R, T).
+
+listar2(A, [A]):-
+    A \= _/\_.
+
+listar2(A, T):-
+    A = X/\Y,
+    listar2(X, R),
+    addElement(Y, R, T).
+
+separar2([A], A).
+
+separar2([A, B], A/\B).
+
+separar2([A | Tail], A/\T):-
+    separar2(Tail, T).
+
