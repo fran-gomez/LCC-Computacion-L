@@ -4,24 +4,27 @@
 :- op(600,xfx,=>).   % implicacion, infija, no asociativa.
 :- op(650,xfx,<=>).  % equivalencia, infija, no asociativa.
 
+
 fncr(T, X) :-
     convertir(T, R),
     reducir(R, F),
     eliminarRep(F, X), !.
 
-negar(A\/B, T):-
+negar(A\/B, R):-
     distribuir(A, M),
     negar(M, X),
     distribuir(B, N),
     negar(N, Y),
-    distribuir(X/\Y, T), !.
+    distribuir(X/\Y, T),
+    reducir(T, R), !.
 
-negar(A/\B, T):-
+negar(A/\B, R):-
     distribuir(A, M),
     negar(M, X),
     distribuir(B, N),
     negar(N, Y),
-    distribuir(X\/Y, T), !.
+    distribuir(X\/Y, T),
+    reducir(T, R), !.
 
 negar((~A), A):-
     ground(a).
@@ -79,9 +82,10 @@ convertir(~(A/\B), T):-
     distribuir(D, N),
     distribuir(M\/N, T), !.
 
-convertir(~A, R):-
+convertir(~A, S):-
     convertir(A, T),
     negar(T, R),
+    distribuir(R, S),
     !.
 
 convertir(A\/A, A).
@@ -99,7 +103,7 @@ distribuir(_A\/top, top).
 
 distribuir(A\/A, A).
 
-distribuir((~A)\/A, _).
+distribuir((~A)\/A, top).
 
 distribuir(A/\A, A).
 
@@ -161,7 +165,7 @@ reducir(A/\B, Z):-
     reducir(N, Y),
     distribuir(X/\Y, Z).
 
-reducir(A/\(~A), _).
+reducir(A/\(~A), top).
 
 reducir(A/\A, A).
 
@@ -171,7 +175,7 @@ reducir(A\/A, A).
 
 reducir(A, A).
 
-reducir(A, _):-
+reducir(A, top):-
     not(ground(A)).
 
 listar(A,_):-
@@ -200,7 +204,7 @@ transformar2(A, B):-
     separar(A, X),
     distribuir(X, B).
 
-transformar2(A, _):-
+transformar2(A, top):-
     transformar(A).
 
 separar([A], A).
