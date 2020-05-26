@@ -10,13 +10,17 @@ fncr(T, X) :-
     eliminarRep(F, X), !.
 
 negar(A\/B, T):-
-    negar(A, X),
-    negar(B, Y),
+    distribuir(A, M),
+    negar(M, X),
+    distribuir(B, N),
+    negar(N, Y),
     distribuir(X/\Y, T), !.
 
 negar(A/\B, T):-
-    negar(A, X),
-    negar(B, Y),
+    distribuir(A, M),
+    negar(M, X),
+    distribuir(B, N),
+    negar(N, Y),
     distribuir(X\/Y, T), !.
 
 negar((~A), A):-
@@ -39,9 +43,9 @@ convertir(X => Y, T) :-
     negar(Xc, A),
     distribuir(A\/B, T), !.
 
-convertir(A\/(~A), _).
+convertir(A\/(~A), top).
 
-convertir(A/\(~A), _).
+convertir(A/\(~A), bottom).
 
 convertir(X/\Y, T):-
     convertir(X, A),
@@ -89,66 +93,59 @@ convertir(X, T):- distribuir(X, T).
 convertir(top, bottom).
 convertir(bottom, top).
 
+distribuir(top\/_A, top).
+
+distribuir(_A\/top, top).
+
 distribuir(A\/A, A).
 
 distribuir((~A)\/A, _).
 
 distribuir(A/\A, A).
 
-distribuir(A\/(B/\C), X/\Y):-
-     A \= _/\_,
-     distribuir(B, M),
-     distribuir(C, N),
-     distribuir(A\/M, X),
-     distribuir(A\/N, Y), !.
-
-distribuir((A/\B)\/C, X/\Y):-
-     C \= _/\_,
-     distribuir(A, M),
-     distribuir(B, N),
-     distribuir((M\/C), X),
-     distribuir((N\/C), Y), !.
-
-
-distribuir((A\/B)/\C, T):-
-     C \= _\/_,
-     distribuir(A/\C, X),
-     distribuir(B/\C, Y),
-     distribuir(X\/Y, T), !.
-
-distribuir(A/\(B\/C), T):-
-    A \= _\/_,
-    distribuir(A/\B, X),
-    distribuir(A/\C, Y),
-    distribuir(X\/Y, T).
-
-distribuir(A/\(B/\C), M/\N/\O):-
-    distribuir(A, M),
-    distribuir(B, N),
-    distribuir(C, O),!.
-
-distribuir(A\/(B\/C), M\/N\/O):-
-    distribuir(A, M),
-    distribuir(B, N),
-    distribuir(C, O),!.
-
-distribuir(A\/B, X\/Y):-
-    A \= B,
-    (~A) \= B,
-    distribuir(A, X),
-    distribuir(B, Y).
-
 distribuir(A/\B, X/\Y):-
     distribuir(A, X),
     distribuir(B, Y).
 
+distribuir(A\/B, R):-
+    distribuir(A, X),
+    distribuir(B, Y),
+    listar2(X, L),
+    listar2(Y, M),
+    combinarOr(L, M, N),
+    sort(N, O),
+    separar2(O, R).
+
 distribuir(A, A):-
     ground(A).
 
-addElement(A, Conjunto, [A | Conjunto]).
+%Distribuye los contenidos de las dos listas separadas por un \/.
+combinarOr([], [], []).
 
-reducir(A, _):-
-    not(ground(A)).
+combinarOr([A], [A], [A]).
+
+combinarOr([A], [B], [A\/B]).
+
+combinarOr([_A], [], []).
+
+combinarOr([A], [B | Tail2], R):-
+    combinarOrAux([A], [B | Tail2], R).
+
+combinarOr([A | Tail1], [B | Tail2], R):-
+    combinarOrAux([A], [B | Tail2], L),
+    combinarOr(Tail1, [B | Tail2], M),
+    append(L, M, R).
+
+combinarOrAux([_A | _Tail1], [], []).
+
+combinarOrAux([A | Tail1], [A | Tail2], [A | R]):-
+    combinarOrAux([A | Tail1], Tail2, R).
+
+combinarOrAux([A | Tail1], [B | Tail2], [A\/B | R]):-
+    combinarOrAux([A | Tail1], Tail2, R).
+
+%Reduce las expresiones, eliminando elementos iguales.
+reducir(top, top).
 
 reducir(A\/B, T):-
     distribuir(A, X),
@@ -164,11 +161,18 @@ reducir(A/\B, Z):-
     reducir(N, Y),
     distribuir(X/\Y, Z).
 
+reducir(A/\(~A), _).
+
 reducir(A/\A, A).
+
+reducir(A\/(~A), top).
 
 reducir(A\/A, A).
 
 reducir(A, A).
+
+reducir(A, _):-
+    not(ground(A)).
 
 listar(A,_):-
     not(ground(A)).
@@ -179,7 +183,8 @@ listar(A, [A]):-
 listar(A, T):-
     A = X\/Y,
     listar(X, R),
-    addElement(Y, R, T).
+    listar(Y, M),
+    append(R, M, T).
 
 transformar([A | Tail]):-
     member((~A), Tail).
@@ -223,7 +228,8 @@ listar2(A, [A]):-
 listar2(A, T):-
     A = X/\Y,
     listar2(X, R),
-    addElement(Y, R, T).
+    listar2(Y, S),
+    append(R, S, T).
 
 
 separar2([], []).
