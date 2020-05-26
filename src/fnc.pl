@@ -6,8 +6,15 @@
 
 
 fncr(T, X) :-
+    write('Eliminando implicaciones...'),
+    nl, nl,
     convertir(T, R),
+    write('Reduciendo lo maximo posible la formula...'),
+    nl, nl,
     reducir(R, F),
+    write('Eliminando conjunciones repetidas...'),
+    nl, nl,
+    write('Resultado: '),
     eliminarRep(F, X), !.
 
 negar(A\/B, R):-
@@ -226,6 +233,8 @@ separar([A,B], A\/B).
 separar([A | Tail], A\/T):-
     separar(Tail, T).
 
+eliminarRep(top, top).
+
 eliminarRep(A, _):-
     not(ground(A)).
 
@@ -250,7 +259,6 @@ listar2(A, T):-
     listar2(X, R),
     listar2(Y, S),
     append(R, S, T).
-
 
 separar2([], []).
 
