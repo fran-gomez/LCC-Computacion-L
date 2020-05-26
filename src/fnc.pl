@@ -92,6 +92,8 @@ convertir(A\/A, A).
 
 convertir(A/\A, A).
 
+convertir(A/\(~A), bottom).
+
 convertir(X, T):- distribuir(X, T).
 
 convertir(top, bottom).
@@ -165,7 +167,7 @@ reducir(A/\B, Z):-
     reducir(N, Y),
     distribuir(X/\Y, Z).
 
-reducir(A/\(~A), top).
+reducir(A/\(~A), bottom).
 
 reducir(A/\A, A).
 
@@ -178,18 +180,28 @@ reducir(A, A).
 reducir(A, top):-
     not(ground(A)).
 
+%Lista los elementos de una formula disyuntiva.
 listar(A,_):-
     not(ground(A)).
 
 listar(A, [A]):-
     A \= _\/_.
 
-listar(A, T):-
+listar(A, F):-
     A = X\/Y,
     listar(X, R),
     listar(Y, M),
-    append(R, M, T).
+    append(R, M, T),
+    checkForTop(T, F).
 
+checkForTop(L, []):-
+    member(top, L).
+
+checkForTop(L, L).
+
+% Verifica que no este A y ~A simultaneamente en una lista. Si encuentra
+% a A y a ~A en la lista, retorna top. Caso contrario, retorna la misma
+% lista.
 transformar([A | Tail]):-
     member((~A), Tail).
 
@@ -219,11 +231,15 @@ eliminarRep(A, _):-
 
 eliminarRep(L, T):-
     listar2(L, S),
+    not(member(bottom, S)),
     sort(S, R),
     separar2(R, T).
 
+eliminarRep(_L, bottom).
 
-listar2(A,_):-
+listar2(top, []).
+
+listar2(A,[]):-
     not(ground(A)).
 
 listar2(A, [A]):-
