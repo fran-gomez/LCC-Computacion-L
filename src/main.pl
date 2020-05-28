@@ -10,5 +10,5 @@
 
 teorema(T) :-
     write('Iniciando prueba de teorema por refutacion...\n'),
-    fncr(T, FNCR),
+    fncr(~(T), FNCR),
     refutable(FNCR).
