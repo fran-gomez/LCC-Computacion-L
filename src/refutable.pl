@@ -18,8 +18,6 @@ refutable(FNCR) :-
 % de los literales no importa
 % TODO: ver por que si las expresiones van a ser
 % parentizadas o no
-%
-
 descomponer_and(A,[]):-
     not(ground(A)).
 
@@ -63,13 +61,14 @@ descomponer_clausula(A, F):-
 % de literales +L, e intenta llegar a la lista
 % vacia (Simbolizando a bottom), mediante el metodo
 % de resoluion de literales complementarios
-refutar([[X|Xs]|Ls]) :-
-    buscar_lit_complementario(X, Ls, T),
-    negar(X, NX),
-    diferencia(T, [NX], DIF),
-    diferencia(Ls, [T], DIF2),
-    union(DIF2, [DIF], UNION),
-    refutar([Xs|UNION]).
+refutar([[X|_Xs]|Ls]) :-
+    buscar_lit_complementario(X, Ls), !.
+%    negar(X, NX),
+%    diferencia(T, [NX], DIF),
+%    diferencia(Ls, [T], DIF2),
+%    union(DIF2, [DIF], UNION),
+refutar([[_X|Xs]|Ls]) :-
+    refutar([Xs|Ls]).
 refutar([[]|Ls]) :-
     refutar(Ls).
 refutar([]).
@@ -77,13 +76,12 @@ refutar(bottom).
 
 % El predicado buscar_lit_complementario busca el literal
 % complementario del parametro +X en la lista de listas de
-% literales y devuelve la lista de literales que lo contiene
-buscar_lit_complementario(X, [L|_Ls], T) :-
+% literales
+buscar_lit_complementario(X, [L|_Ls]) :-
     negar(X, NX),
-    pertenece(NX, L),
-    T = L.
-buscar_lit_complementario(X, [_L|Ls], T) :-
-    buscar_lit_complementario(X, Ls, T).
+    pertenece(NX, L).
+buscar_lit_complementario(X, [_L|Ls]) :-
+    buscar_lit_complementario(X, Ls).
 
 %=======================================%
 %   Unidades de testeo de predicados    %
@@ -125,6 +123,9 @@ test(refutar) :-
 
 test(refutar) :-
     refutar([bottom]).
+
+test(refutar) :-
+    refutar([[a], [~b], [a, b], [a, ~b], [b, ~a], [~a, ~b]]).
 
 :- end_tests(refutar).
 
