@@ -1,5 +1,6 @@
 :- [conjunto].
-:- [fnc].
+
+:- discontiguous negar/2.
 
 % El predicado refutable recibe una fbf en forma
 % normal conjuntiva y verifica si es refutable
@@ -45,32 +46,66 @@ descomponer_clausula(A, [A]).
 % de resoluion de literales complementarios
 refutar([[X|Xs]|Ls]) :-
     buscar_lit_complementario(X, Ls, T),
-    write(T), nl,
     negar(X, NX),
     diferencia(T, [NX], DIF),
-    write(DIF),  nl,
     diferencia(Ls, [T], DIF2),
-    write(DIF2), nl,
     union(DIF2, [DIF], UNION),
-    write(UNION), nl,
-    write([Xs|UNION]), nl,
-    nl, nl,
     refutar([Xs|UNION]).
 refutar([[]|Ls]) :-
     refutar(Ls).
 refutar([]).
+refutar(bottom).
 
 % El predicado buscar_lit_complementario busca el literal
 % complementario del parametro +X en la lista de listas de
 % literales y devuelve la lista de literales que lo contiene
-%
-% Hay un error aca que no me doy cuenta como arreglar, cuando
-% un literal no tiene su complementario, este predicado deberia
-% fallar en lugar de devolver la lista vacia.
 buscar_lit_complementario(X, [L|_Ls], T) :-
     negar(X, NX),
     pertenece(NX, L),
     T = L.
 buscar_lit_complementario(X, [_L|Ls], T) :-
     buscar_lit_complementario(X, Ls, T).
-buscar_lit_complementario(_, [], []). % Aca tendria que hacer algo tipo return false
+
+%=======================================%
+%   Unidades de testeo de predicados    %
+%=======================================%
+:- begin_tests(refutar).
+
+test(refutar) :-
+    refutar([]).
+
+test(refutar) :-
+    refutar([ [a, ~b], [b, ~a] ]).
+
+test(refutar) :-
+    refutar([ [a, b], [~a, ~c], [~b, c] ]).
+
+test(refutar) :-
+    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b] ]).
+
+test(refutar) :-
+    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b], [f] ]).
+
+test(refutar) :-
+    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b], [f], [g, ~f] ]).
+
+test(refutar) :-
+    refutar([ [~a, ~b, ~c, ~d], [a, b, c, d] ]).
+
+test(refutar) :-
+    refutar([ [a], [b], [c], [d], [~d], [~a], [~c] ]).
+
+test(refutar) :-
+    refutar([a, b, c, d]).
+
+test(refutar) :-
+    refutar([ a, b, ~a, ~b ]). % Recien me avive que esto reduce a top en fncr...
+
+test(refutar) :-
+    refutar([top]).
+
+test(refutar) :-
+    refutar([bottom]).
+
+:- end_tests(refutar).
+
