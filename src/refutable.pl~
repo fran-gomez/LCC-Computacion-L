@@ -37,6 +37,9 @@ descomponer_and(A, T):-
 % de clausulas +LC y la descompone en una lista
 % que contiene todas las listas de literales que
 % formaban las clausulas recibidas -LL
+
+
+
 descomponer_or([LC|LCs], [LL|LLs]) :-
     descomponer_clausula(LC, LL),
     descomponer_or(LCs, LLs).
