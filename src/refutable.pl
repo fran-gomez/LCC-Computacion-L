@@ -61,71 +61,52 @@ descomponer_clausula(A, F):-
 % de literales +L, e intenta llegar a la lista
 % vacia (Simbolizando a bottom), mediante el metodo
 % de resoluion de literales complementarios
-refutar([[X|_Xs]|Ls]) :-
-    buscar_lit_complementario(X, Ls), !.
-%    negar(X, NX),
-%    diferencia(T, [NX], DIF),
-%    diferencia(Ls, [T], DIF2),
-%    union(DIF2, [DIF], UNION),
-refutar([[_X|Xs]|Ls]) :-
-    refutar([Xs|Ls]).
-refutar([[]|Ls]) :-
-    refutar(Ls).
+refutar(S) :-
+    generar_todas_resolventes(S, T),
+    pertenece([], T).
+refutar(S) :-
+    generar_todas_resolventes(S, T),
+    not(pertenece([], T)),
+    not(equivalente(S, T)),
+    refutar(T).
 refutar([]).
-refutar(bottom).
+
+equivalente([],[]).
+equivalente([X|Xs],Y):-
+    pertenece(X,Y),
+    diferencia(Y,[X],AUX),
+    equivalente(Xs,AUX).
+
+% El predicado generar_todas_resolventes genera todas
+% las resolventes del conjunto +S, y las guarda en el
+% conjunto T
+generar_todas_resolventes(S, T) :-
+    findall(R,(member(X,S),member(Y,S),resolvente(X,Y,R1),sort(R1,R)),TMP),
+    sort(TMP, T).
+
+% El predicado resolvente genera la resolvente por
+% literales complementarios de dos conjuntos +X e +Y,
+% y la devuelve en -R
+% Si no hay literal complementario entre ellos, devuelve
+% al conjunto X como resolvente
+resolvente([], _, []).
+resolvente(X, X, X).
+resolvente([X|Xs], Y, [X|R]) :-
+    negar(X, NX),
+    not(pertenece(NX, Y)),
+    resolvente(Xs, Y, R).
+resolvente([X|Xs], Y, R) :-
+    negar(X, NX),
+    pertenece(NX, Y),
+    diferencia(Y, [NX], R1),
+    union(Xs, R1, R).
 
 % El predicado buscar_lit_complementario busca el literal
 % complementario del parametro +X en la lista de listas de
-% literales
-buscar_lit_complementario(X, [L|_Ls]) :-
+% literales y devuelve la lista de literales que lo contiene
+buscar_lit_complementario(X, [L|_Ls], T) :-
     negar(X, NX),
-    pertenece(NX, L).
-buscar_lit_complementario(X, [_L|Ls]) :-
-    buscar_lit_complementario(X, Ls).
-
-%=======================================%
-%   Unidades de testeo de predicados    %
-%=======================================%
-:- begin_tests(refutar).
-
-test(refutar) :-
-    refutar([]).
-
-test(refutar) :-
-    refutar([ [a, ~b], [b, ~a] ]).
-
-test(refutar) :-
-    refutar([ [a, b], [~a, ~c], [~b, c] ]).
-
-test(refutar) :-
-    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b] ]).
-
-test(refutar) :-
-    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b], [f] ]).
-
-test(refutar) :-
-    refutar([ [a, c, d], [~b, ~d], [~a, ~c, b], [f], [g, ~f] ]).
-
-test(refutar) :-
-    refutar([ [~a, ~b, ~c, ~d], [a, b, c, d] ]).
-
-test(refutar) :-
-    refutar([ [a], [b], [c], [d], [~d], [~a], [~c] ]).
-
-test(refutar) :-
-    refutar([a, b, c, d]).
-
-test(refutar) :-
-    refutar([ a, b, ~a, ~b ]). % Recien me avive que esto reduce a top en fncr...
-
-test(refutar) :-
-    refutar([top]).
-
-test(refutar) :-
-    refutar([bottom]).
-
-test(refutar) :-
-    refutar([[a], [~b], [a, b], [a, ~b], [b, ~a], [~a, ~b]]).
-
-:- end_tests(refutar).
-
+    pertenece(NX, L),
+    T = L.
+buscar_lit_complementario(X, [_L|Ls], T) :-
+    buscar_lit_complementario(X, Ls, T).

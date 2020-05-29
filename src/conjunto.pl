@@ -60,6 +60,7 @@ intersectar(_A, [], []).
 % comun con el conjunto +B, y lo devuelve
 % en el conjunto -U
 diferencia([], _, []).
+diferencia(A, [], A).
 diferencia([X|As], B, U) :-
     pertenece(X, B),
     !,
