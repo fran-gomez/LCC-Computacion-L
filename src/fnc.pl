@@ -1,5 +1,5 @@
 
-fncr(T, X) :-
+fncr(T, FNCR) :-
     write('Eliminando implicaciones...'),
     nl, nl,
     convertir(T, R),
@@ -9,7 +9,7 @@ fncr(T, X) :-
     write('Eliminando conjunciones repetidas...'),
     nl, nl,
     write('Resultado: '),
-    eliminarRep(F, X), !.
+    eliminarRep(F, FNCR), !.
 
 negar(top, bottom).
 

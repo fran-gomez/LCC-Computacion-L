@@ -11,6 +11,10 @@ fncr(T, X) :-
     write('Resultado: '),
     eliminarRep(F, X), !.
 
+negar(top, bottom).
+
+negar(bottom, top).
+
 negar(A\/B, R):-
     distribuir(A, M),
     negar(M, X),
