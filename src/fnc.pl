@@ -11,6 +11,10 @@ fncr(T, X) :-
     write('Resultado: '),
     eliminarRep(F, X), !.
 
+negar(top, bottom).
+
+negar(bottom, top).
+
 negar(A\/B, R):-
     distribuir(A, M),
     negar(M, X),
@@ -27,11 +31,16 @@ negar(A/\B, R):-
     distribuir(X\/Y, T),
     reducir(T, R), !.
 
+negar(A<=>B, T):-
+    negar((A=>B)/\(B=>A), T).
+
 negar((~A), A):-
     ground(a).
 
 negar(A, ~A):-
     ground(A), !.
+
+convertir(~(top), bottom).
 
 convertir((X <=> Y), M/\N) :-
     convertir((X => Y), A),
