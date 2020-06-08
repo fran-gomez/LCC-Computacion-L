@@ -10,14 +10,8 @@
 
 teorema(T) :-
     write('Iniciando prueba de teorema por refutacion...\n'),
-    negar(T, NT),
-    fncr(NT, FNCR),
-    teoremaAux(FNCR), !.
-
-teoremaAux(bottom).
-
-teoremaAux(T):-
-    refutable(T).
+    fncr(~(T), FNCR),
+    refutable(FNCR).
 
 :- begin_tests(teorema).
 

@@ -63,27 +63,25 @@ descomponer_clausula(A, F):-
 % de resoluion de literales complementarios
 refutar(S) :-
     generar_todas_resolventes(S, T),
-    pertenece([], T).
+    member([], T).
 refutar(S) :-
     generar_todas_resolventes(S, T),
-    not(pertenece([], T)),
+    not(member([], T)),
     not(iguales(S, T)),
     refutar(T).
 refutar([]).
 
 % El predicado iguales verifica si dos conjuntos
 % de resolventes +X e +Y son iguales
-iguales([X|Xs],Y):-
-    pertenece(X,Y),
-    diferencia(Y,[X],AUX),
-    iguales(Xs,AUX).
-iguales([],[]).
+iguales(X, Y) :-
+    subtract(X, Y, []),
+    subtract(Y, X, []).
 
 % El predicado generar_todas_resolventes genera todas
 % las resolventes del conjunto +S, y las guarda en el
 % conjunto T
 generar_todas_resolventes(S, T) :-
-    findall(R,(pertenece(X,S),pertenece(Y,S),resolvente(X,Y,R1),sort(R1,R)),TMP),
+    findall(R,(member(X,S),member(Y,S),resolvente(X,Y,R1),sort(R1,R)),TMP),
     sort(TMP, T).
 
 % El predicado resolvente genera la resolvente por
@@ -95,10 +93,10 @@ resolvente([], _, []).
 resolvente(X, X, X).
 resolvente([X|Xs], Y, [X|R]) :-
     negar(X, NX),
-    not(pertenece(NX, Y)),
+    not(member(NX, Y)),
     resolvente(Xs, Y, R).
 resolvente([X|Xs], Y, R) :-
     negar(X, NX),
-    pertenece(NX, Y),
-    diferencia(Y, [NX], R1),
+    member(NX, Y),
+    subtract(Y, [NX], R1),
     union(Xs, R1, R).
