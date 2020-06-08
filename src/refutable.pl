@@ -67,21 +67,23 @@ refutar(S) :-
 refutar(S) :-
     generar_todas_resolventes(S, T),
     not(pertenece([], T)),
-    not(equivalente(S, T)),
+    not(iguales(S, T)),
     refutar(T).
 refutar([]).
 
-equivalente([],[]).
-equivalente([X|Xs],Y):-
+% El predicado iguales verifica si dos conjuntos
+% de resolventes +X e +Y son iguales
+iguales([X|Xs],Y):-
     pertenece(X,Y),
     diferencia(Y,[X],AUX),
-    equivalente(Xs,AUX).
+    iguales(Xs,AUX).
+iguales([],[]).
 
 % El predicado generar_todas_resolventes genera todas
 % las resolventes del conjunto +S, y las guarda en el
 % conjunto T
 generar_todas_resolventes(S, T) :-
-    findall(R,(member(X,S),member(Y,S),resolvente(X,Y,R1),sort(R1,R)),TMP),
+    findall(R,(pertenece(X,S),pertenece(Y,S),resolvente(X,Y,R1),sort(R1,R)),TMP),
     sort(TMP, T).
 
 % El predicado resolvente genera la resolvente por
@@ -100,13 +102,3 @@ resolvente([X|Xs], Y, R) :-
     pertenece(NX, Y),
     diferencia(Y, [NX], R1),
     union(Xs, R1, R).
-
-% El predicado buscar_lit_complementario busca el literal
-% complementario del parametro +X en la lista de listas de
-% literales y devuelve la lista de literales que lo contiene
-buscar_lit_complementario(X, [L|_Ls], T) :-
-    negar(X, NX),
-    pertenece(NX, L),
-    T = L.
-buscar_lit_complementario(X, [_L|Ls], T) :-
-    buscar_lit_complementario(X, Ls, T).
