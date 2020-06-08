@@ -12,7 +12,7 @@ teorema(T) :-
     write('Iniciando prueba de teorema por refutacion...\n'),
     negar(T, NT),
     fncr(NT, FNCR),
-    teoremaAux(FNCR).
+    teoremaAux(FNCR), !.
 
 teoremaAux(top).
 

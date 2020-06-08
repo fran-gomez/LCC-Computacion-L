@@ -14,7 +14,7 @@ teorema(T) :-
     fncr(NT, FNCR),
     teoremaAux(FNCR), !.
 
-teoremaAux(top).
+teoremaAux(bottom).
 
 teoremaAux(T):-
     refutable(T).

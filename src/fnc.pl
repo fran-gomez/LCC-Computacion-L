@@ -1,5 +1,5 @@
 
-fncr(T, X) :-
+fncr(T, FNCR) :-
     write('Eliminando implicaciones...'),
     nl, nl,
     convertir(T, R),
@@ -9,7 +9,11 @@ fncr(T, X) :-
     write('Eliminando conjunciones repetidas...'),
     nl, nl,
     write('Resultado: '),
-    eliminarRep(F, X), !.
+    eliminarRep(F, FNCR), !.
+
+negar(top, bottom).
+
+negar(bottom, top).
 
 negar(A\/B, R):-
     distribuir(A, M),
@@ -27,11 +31,16 @@ negar(A/\B, R):-
     distribuir(X\/Y, T),
     reducir(T, R), !.
 
+negar(A<=>B, T):-
+    negar((A=>B)/\(B=>A), T).
+
 negar((~A), A):-
     ground(a).
 
 negar(A, ~A):-
     ground(A), !.
+
+convertir(~(top), bottom).
 
 convertir((X <=> Y), M/\N) :-
     convertir((X => Y), A),

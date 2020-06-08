@@ -1,9 +1,3 @@
-:- op(300,fx,~).     % negacion, prefija, no asociativa.
-:- op(400,yfx,(/\)). % conjuncion, infija, asociativa a izquierda.
-:- op(500,yfx,(\/)). % disyuncion, infija, asociativa a izquierda.
-:- op(600,xfx,=>).   % implicacion, infija, no asociativa.
-:- op(650,xfx,<=>).  % equivalencia, infija, no asociativa.
-
 
 fncr(T, X) :-
     write('Eliminando implicaciones...'),
@@ -14,7 +8,12 @@ fncr(T, X) :-
     reducir(R, F),
     write('Eliminando conjunciones repetidas...'),
     nl, nl,
+    write('Resultado: '),
     eliminarRep(F, X), !.
+
+negar(top, bottom).
+
+negar(bottom, top).
 
 negar(A\/B, R):-
     distribuir(A, M),
@@ -32,11 +31,16 @@ negar(A/\B, R):-
     distribuir(X\/Y, T),
     reducir(T, R), !.
 
+negar(A<=>B, T):-
+    negar((A=>B)/\(B=>A), T).
+
 negar((~A), A):-
     ground(a).
 
 negar(A, ~A):-
     ground(A), !.
+
+convertir(~(top), bottom).
 
 convertir((X <=> Y), M/\N) :-
     convertir((X => Y), A),
